@@ -1,0 +1,10 @@
+<Monitoring>
+    <Host address="localhost" >
+        <CPU measure="idle,user,system,iowait" />
+        <System />
+        <Memory measure="free,used,cached,buff" />
+        <Disk />
+        <Net measure="recv,send,estab" />
+        <Netstat/>
+    </Host>
+</Monitoring>

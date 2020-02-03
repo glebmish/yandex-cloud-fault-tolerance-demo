@@ -1,0 +1,9 @@
+spec:
+  containers:
+    - name: todo
+      image: ${docker_image}
+      env:
+        - name: DATABASE_URI
+          value: ${database_uri}
+        - name: DATABASE_HOSTS
+          value: ${database_hosts}
