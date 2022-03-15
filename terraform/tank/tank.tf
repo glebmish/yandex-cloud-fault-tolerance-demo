@@ -14,22 +14,6 @@ data "yandex_lb_network_load_balancer" "todo_lb" {
   name = "todo-lb"
 }
 
-data "template_file" "user-data" {
-  template = "${file("${path.module}/files/user-data.tpl")}"
-  vars = {
-    user = var.user
-    ssh-key = "${local.public_ssh_key}"
-  }
-}
-
-data "template_file" "load_yaml" {
-  template = "${file("${path.module}/files/load.yaml.tpl")}"
-  vars = {
-    address =   "${tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.external_address_spec.0.address}"
-    port = "${tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.port}"
-  }
-}
-
 resource "yandex_compute_instance" "tank" {
   name = "todo-tank"
   folder_id = "${var.yc_folder}"
@@ -51,13 +35,25 @@ resource "yandex_compute_instance" "tank" {
     nat = "true"
   }
   metadata = {
-    user-data = "${data.template_file.user-data.rendered}"
+    user-data = templatefile(
+      "${path.module}/files/user-data.tpl",
+      {
+        user = var.user
+        ssh-key = "${local.public_ssh_key}"
+      }
+    )
   }
 
   // below are files that will be used by tank
 
   provisioner "file" {
-    content = "${data.template_file.load_yaml.rendered}"
+    content = templatefile(
+      "${path.module}/files/load.yaml.tpl",
+      {
+        address =   "${tolist(tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.external_address_spec).0.address}"
+        port = "${tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.port}"
+      }
+    )
     destination = "/home/${var.user}/load.yaml"
     connection {
       type = "ssh"

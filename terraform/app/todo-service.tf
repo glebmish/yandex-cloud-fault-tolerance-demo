@@ -7,15 +7,6 @@ data "yandex_container_registry" "todo_registry" {
   folder_id = "${var.yc_folder}"
 }
 
-data "template_file" "docker_spec" {
-  template = "${file("${path.module}/files/spec.yaml")}"
-  vars = {
-    docker_image = "cr.yandex/${data.yandex_container_registry.todo_registry.id}/todo-demo:v1"
-    database_uri = "postgresql://${local.dbuser}:${local.dbpassword}@:1/${local.dbname}"
-    database_hosts = "${join(",", local.dbhosts)}"
-  }
-}
-
 resource "yandex_compute_instance_group" "todo_instances" {
   name = "todo-ig"
   folder_id = "${var.yc_folder}"
@@ -30,7 +21,7 @@ resource "yandex_compute_instance_group" "todo_instances" {
       mode = "READ_WRITE"
       initialize_params {
         image_id = "${data.yandex_compute_image.coi.id}"
-        size = 10
+        size = 30
       }
     }
     network_interface {
@@ -40,7 +31,14 @@ resource "yandex_compute_instance_group" "todo_instances" {
     service_account_id = "${yandex_iam_service_account.todo_node_sa.id}"
     metadata = {
       ssh-keys = "${var.user}:${file("~/.ssh/id_rsa.pub")}"
-      docker-container-declaration = "${data.template_file.docker_spec.rendered}"
+      docker-container-declaration = templatefile(
+        "${path.module}/files/spec.yaml",
+        {
+          docker_image = "cr.yandex/${data.yandex_container_registry.todo_registry.id}/todo-demo:v1"
+          database_uri = "postgresql://${local.dbuser}:${local.dbpassword}@:1/${local.dbname}"
+          database_hosts = "${join(",", local.dbhosts)}"
+        }
+      )
     }
   }
 

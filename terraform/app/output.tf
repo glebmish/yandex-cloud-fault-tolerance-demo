@@ -1,5 +1,5 @@
 locals {
-  lbaddress = "${tolist(yandex_lb_network_load_balancer.todo_lb.listener).0.external_address_spec.0.address}"
+  lbaddress = "${tolist(tolist(yandex_lb_network_load_balancer.todo_lb.listener).0.external_address_spec).0.address}"
   lbport = "${tolist(yandex_lb_network_load_balancer.todo_lb.listener).0.port}"
 }
 
