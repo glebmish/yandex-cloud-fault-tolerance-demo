@@ -3,44 +3,39 @@ data "yandex_compute_image" "coi" {
 }
 
 data "yandex_container_registry" "todo_registry" {
-  name = "${local.registry_name}"
-  folder_id = "${var.yc_folder}"
-}
-
-data "template_file" "docker_spec" {
-  template = "${file("${path.module}/files/spec.yaml")}"
-  vars = {
-    docker_image = "cr.yandex/${data.yandex_container_registry.todo_registry.id}/todo-demo:v1"
-    database_uri = "postgresql://${local.dbuser}:${local.dbpassword}@:1/${local.dbname}"
-    database_hosts = "${join(",", local.dbhosts)}"
-  }
+  name      = local.registry_name
+  folder_id = var.yc_folder
 }
 
 resource "yandex_compute_instance_group" "todo_instances" {
-  name = "todo-ig"
-  folder_id = "${var.yc_folder}"
-  service_account_id = "${yandex_iam_service_account.todo_ig_sa.id}"
+  name               = "todo-ig"
+  folder_id          = var.yc_folder
+  service_account_id = yandex_iam_service_account.todo_ig_sa.id
   instance_template {
     platform_id = "standard-v2"
     resources {
       memory = 2
-      cores = 2
+      cores  = 2
     }
     boot_disk {
       mode = "READ_WRITE"
       initialize_params {
-        image_id = "${data.yandex_compute_image.coi.id}"
-        size = 10
+        image_id = data.yandex_compute_image.coi.id
+        size     = 30
       }
     }
     network_interface {
-      network_id = "${yandex_vpc_network.todo-network.id}"
-      nat = "true"
+      network_id = yandex_vpc_network.todo-network.id
+      nat        = "true"
     }
-    service_account_id = "${yandex_iam_service_account.todo_node_sa.id}"
+    service_account_id = yandex_iam_service_account.todo_node_sa.id
     metadata = {
       ssh-keys = "${var.user}:${file("~/.ssh/id_rsa.pub")}"
-      docker-container-declaration = "${data.template_file.docker_spec.rendered}"
+      docker-container-declaration = templatefile("${path.module}/files/spec.yaml", {
+        docker_image   = "cr.yandex/${data.yandex_container_registry.todo_registry.id}/todo-demo:v1"
+        database_uri   = "postgresql://${local.dbuser}:${local.dbpassword}@:1/${local.dbname}"
+        database_hosts = "${join(",", local.dbhosts)}"
+      })
     }
   }
 
@@ -59,7 +54,7 @@ resource "yandex_compute_instance_group" "todo_instances" {
 
   deploy_policy {
     max_unavailable = 2
-    max_expansion = 2
+    max_expansion   = 2
   }
 
   load_balancer {
@@ -67,9 +62,9 @@ resource "yandex_compute_instance_group" "todo_instances" {
   }
 
   health_check {
-    healthy_threshold = 2
-    interval = 2
-    timeout = 1
+    healthy_threshold   = 2
+    interval            = 2
+    timeout             = 1
     unhealthy_threshold = 2
 
     http_options {
