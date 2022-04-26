@@ -45,7 +45,7 @@ resource "yandex_compute_instance" "tank" {
 
   provisioner "file" {
     content = templatefile("${path.module}/files/load.yaml.tpl", {
-      address = "${tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.external_address_spec.0.address}"
+      address = "${tolist(tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.external_address_spec).0.address}"
       port    = "${tolist(data.yandex_lb_network_load_balancer.todo_lb.listener).0.port}"
     })
     destination = "/home/${var.user}/load.yaml"

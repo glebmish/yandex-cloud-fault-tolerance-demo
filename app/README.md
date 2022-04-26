@@ -11,11 +11,11 @@
     ```
 1. Собрать docker-образ с тегом v1
     ```bash
-    docker build . --tag cr.yandex/<registry_id>/todo-demo:v1
+    docker build . --tag cr.yandex/<registry_id>/todo-demo:v1 --platform linux/amd64
     ```
 1. Собрать docker-образ с тегом v2 (для проверки сценария обновления приложения)
     ```bash
-    docker build . --build-arg COLOR_SCHEME=dark --tag cr.yandex/<registry_id>/todo-demo:v2
+    docker build . --build-arg COLOR_SCHEME=dark --tag cr.yandex/<registry_id>/todo-demo:v2 --platform linux/amd64
     ```
 1. Загрузить docker-образы в Container Registry
     ```bash
