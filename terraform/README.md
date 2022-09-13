@@ -45,7 +45,7 @@ terraform destroy -var yc_folder=<folder_id> -var yc_token=<yc_token> -var user=
     ```bash
     terraform init
     ```
-1. В файле [tank/main.tf](tank/main.tf) укажите путь к публичному и приватному ssh ключам (Дефолтные значения `~/.ssh/id_rsa.pub` и `~/.ssh/id_rsa`)
+1. В файле [tank/main.tf](tank/main.tf) укажите путь к публичному и приватному ssh ключам (Дефолтные значения `~/.ssh/id_ed25519.pub` и `~/.ssh/id_ed25519`)
 1. Развернуть и запустить приложение. 
     
     **Внимание: Танк необходимо создавать после основного окружения, так как оно необходимо для генерации конфигов.**

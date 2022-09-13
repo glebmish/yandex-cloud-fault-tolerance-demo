@@ -1,6 +1,6 @@
 locals {
-  public_ssh_key = "${file("~/.ssh/id_rsa.pub")}"
-  private_ssh_key = "${file("~/.ssh/id_rsa")}"
+  public_ssh_key = "${file("~/.ssh/id_ed25519.pub")}"
+  private_ssh_key = "${file("~/.ssh/id_ed25519")}"
 }
 
 provider "yandex" {

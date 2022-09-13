@@ -30,7 +30,7 @@ resource "yandex_compute_instance_group" "todo_instances" {
     }
     service_account_id = yandex_iam_service_account.todo_node_sa.id
     metadata = {
-      ssh-keys = "${var.user}:${file("~/.ssh/id_rsa.pub")}"
+      ssh-keys = "${var.user}:${file("~/.ssh/id_ed25519.pub")}"
       docker-container-declaration = templatefile("${path.module}/files/spec.yaml", {
         docker_image   = "cr.yandex/${data.yandex_container_registry.todo_registry.id}/todo-demo:v1"
         database_uri   = "postgresql://${local.dbuser}:${local.dbpassword}@:1/${local.dbname}"
